@@ -1,56 +1,3 @@
-# Message Intelligence Pipeline — L1 Assignment
-
-A local, rule-based system that classifies messages, extracts tasks/events,
-and detects + masks sensitive information across the 900-message dataset.
-
-## Why rule-based, not an LLM/ML model
-
-I inspected all 900 messages before writing any code. The dataset turns out
-to be built from a small, fixed set of **126 sentence templates** (a
-handful of "envelope" prefixes like `FYI:`, `Quick update:`, `One more
-thing:` wrapped around ~20 event templates, ~20 task templates, ~15
-personal-info templates, ~10 promotional templates, and a long tail of
-general-information one-liners), each with dates/numbers substituted in.
-
-Given that, a deterministic rule/regex system:
-- gets every extractable field right instead of "usually right" (a model
-  trained/prompted on this would give me confidence scores I couldn't
-  fully justify),
-- lets me point at one line of code for every decision in the video, which
-  is explicitly what the brief asks for ("you must understand and explain
-  everything submitted"),
-- never sends a single message to an external API, satisfying the
-  "do not rely completely on ChatGPT or external APIs" / "do not send raw
-  messages to external services" rules by construction.
-
-If the real inbox this system eventually runs on turns out *not* to be
-templated, the natural next step is to keep this rule layer as a
-high-precision first pass and fall back to a small local classifier
-(e.g. TF-IDF + logistic regression, or a local sentence-embedding
-similarity search) for anything the rules don't match — see
-**Limitations** below.
-
-## Repository layout
-
-```
-src/
-  classifier.py           # Part 1: 6-category classification
-  extractor.py             # Part 2: task/event extraction
-  sensitive_detector.py     # Part 3: sensitive info detection + masking
-  pipeline.py               # orchestrates all three, chronological order
-app/
-  app.py                    # Flask demo UI (reads only pipeline output)
-  templates/                 # HTML views: overview, classification,
-                              # tasks/events, sensitive info, mandatory IDs
-output/
-  classifications.json        # Part 1 output, one record per message
-  tasks_events.json           # Part 2 output
-  sensitive_findings.json     # Part 3 output (masked)
-  display_messages.json       # UI-safe message list (sensitive rows pre-masked)
-  mandatory_ids_report.json   # combined view for the 15 required IDs
-  summary.json
-requirements.txt
-```
 
 The **raw dataset (`messages.csv`) is intentionally not included** in this
 repository, per the assignment rules. `pipeline.py` takes its path as a
@@ -65,15 +12,15 @@ specific rule first:
 1. `promotional` — message contains a discount-code / marketing phrase
    (`Use code SAVE...`, `You may like our new student plan`).
 2. `sensitive_information` — reuses the Part 3 detector; if any sensitive
-   pattern fires, the message is sensitive regardless of anything else in
-   it.
+   pattern fires, the message is sensitive regardless of anything else
+   in it.
 3. `meeting_or_event` — matches one of the 5 known scheduling templates
    (`Calendar update: ...`, `Reminder: ... happens on ...`, `Please join
    the ... on ...`, `... is scheduled for ...`, `Are you available for
    the ... at ... on ...?`).
 4. `action_required` — matches one of the known request/reminder/deadline
-   templates (`Can you ... before DATE?`, `Please ... by DATE`, `Don't
-   forget to ...; deadline is DATE`, etc.).
+   templates (`Can you ... before DATE?`, `Please ... by DATE`,
+   `Don't forget to ...; deadline is DATE`, etc.).
 5. `personal_information` — starts with a self-report marker (`For my
    profile,`, `Personal note:`, `Remember that`, `Just so you know,`)
    describing a preference, not a secret.
@@ -90,11 +37,10 @@ signal than "an explicit template matched."
 `extractor.py` first strips the envelope prefix, then tries the 5 event
 regexes and ~15 task regexes built directly from the templates found
 during inspection. Each regex captures the concrete fields (title, date,
-time, location/person) with **named capture groups** — nothing is
-inferred outside of what the regex actually captured.
+time, location/person) with **named capture groups** — nothing is inferred
+outside of what the regex actually captured.
 
-Deliberately unresolved cases (do not invent missing data, per the
-brief):
+Deliberately unresolved cases (do not invent missing data, per the brief):
 - `"Could you send it soon?"` → task, `deadline: null` (no date given at
   all).
 - `"If possible, review the file before the meeting."` → task,
@@ -148,7 +94,7 @@ outputs are cross-referenced in `mandatory_ids_report.json`.
 - A `person` field is only populated when a name from the small fixed
   cast of senders (`Meera, Ishaan, Kabir, Aarav, Ananya, Neha, Tara,
   Vikram, Rohan, Maya`) appears explicitly in the message text — the
-  *sender* of the message is not automatically treated as the "person
+  sender of the message is not automatically treated as the "person
   involved," since in this dataset the sender is usually the requester,
   not the assignee.
 - Where the same underlying fact template appears with and without an
@@ -157,8 +103,8 @@ outputs are cross-referenced in `mandatory_ids_report.json`.
 
 ## Limitations & possible improvements
 
-- **Rule coverage is tied to the templates observed in this dataset.** A
-  message phrased differently from all 126 templates (e.g. a typo-laden
+- **Rule coverage is tied to the templates observed in this dataset.**
+  A message phrased differently from all 126 templates (e.g. a typo-laden
   or free-form real email) would fall through to `general_information`
   with low confidence rather than being correctly classified — this is
   the main gap between this prototype and a production system.
@@ -201,20 +147,3 @@ python3 src/pipeline.py /path/to/messages.csv /path/to/mandatory_demo_ids.csv ou
 # 2. Run the demo UI locally
 cd app && python3 app.py
 # -> http://localhost:5000
-```
-
-## Deploying the cloud demo
-
-Any free Python host works since this is a plain Flask app with no
-database. Fastest options:
-
-- **Render.com**: New → Web Service → connect this repo → build command
-  `pip install -r requirements.txt`, start command
-  `python app.py` (root directory `app/`).
-- **Railway.app**: New Project → Deploy from GitHub repo → auto-detects
-  Flask.
-- **PythonAnywhere**: upload `app/` and `output/`, create a Flask web app
-  pointing at `app.py`.
-
-Set the `PORT` environment variable if your host requires it (the app
-already reads `PORT` from the environment, defaulting to 5000).

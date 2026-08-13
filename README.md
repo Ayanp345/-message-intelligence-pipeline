@@ -1,9 +1,4 @@
 
-The **raw dataset (`messages.csv`) is intentionally not included** in this
-repository, per the assignment rules. `pipeline.py` takes its path as a
-command-line argument so anyone with the original file can regenerate all
-outputs locally.
-
 ## Part 1 — Classification
 
 `classifier.py` runs an **ordered rule cascade** (first match wins), most

@@ -1,6 +1,5 @@
 """
-classifier.py
---------------
+
 Classifies a message into one of six categories:
 
   action_required, meeting_or_event, personal_information,
@@ -41,7 +40,7 @@ PERSONAL_MARKER_RE = re.compile(
 def classify(message_id: str, sender: str, text: str):
     core = strip_prefix(text)
 
-    # 1. Promotional -----------------------------------------------------
+    # 1. Promotional
     if PROMO_RE.search(text):
         return {
             "message_id": message_id,
@@ -50,7 +49,7 @@ def classify(message_id: str, sender: str, text: str):
             "reason": "Message contains marketing language and/or a discount code ('Use code ...') typical of a promotional blast.",
         }
 
-    # 2. Sensitive information -------------------------------------------
+    # 2. Sensitive information 
     sensitive_hits = detect_sensitive(message_id, text)
     if sensitive_hits:
         types = ", ".join(sorted({h.sensitivity_type for h in sensitive_hits}))
@@ -61,7 +60,7 @@ def classify(message_id: str, sender: str, text: str):
             "reason": f"Message contains sensitive data matching pattern(s): {types}.",
         }
 
-    # 3. Meeting or event --------------------------------------------------
+    # 3. Meeting or event 
     for pat in EVENT_PATTERNS:
         if pat.search(core):
             return {
@@ -71,7 +70,7 @@ def classify(message_id: str, sender: str, text: str):
                 "reason": "Message matches a known scheduling template (calendar update / reminder / invite / 'scheduled for').",
             }
 
-    # 4. Action required ---------------------------------------------------
+    # 4. Action required 
     for pat, _ in TASK_PATTERNS:
         if pat.search(core):
             return {
@@ -81,7 +80,7 @@ def classify(message_id: str, sender: str, text: str):
                 "reason": "Message asks the recipient to do something (request, reminder, or deadline phrasing).",
             }
 
-    # 5. Personal information ----------------------------------------------
+    # 5. Personal information 
     if PERSONAL_MARKER_RE.search(core):
         return {
             "message_id": message_id,
@@ -90,7 +89,7 @@ def classify(message_id: str, sender: str, text: str):
             "reason": "Message is a self-reported personal preference/profile statement (not a secret/credential).",
         }
 
-    # 6. General information (fallback) ------------------------------------
+    # 6. General information (fallback) 
     return {
         "message_id": message_id,
         "category": "general_information",

@@ -1,6 +1,4 @@
 """
-extractor.py
-------------
 Pulls structured task / meeting-event records out of a message.
 
 Design: the dataset (verified by inspecting all 900 rows) is built from a
@@ -30,7 +28,7 @@ PREFIXES = [
 DATE_RE = r"(?P<date>\d{4}-\d{2}-\d{2})"
 TIME_RE = r"(?P<time>\d{1,2}:\d{2})"
 
-# ---------------------------------------------------------------- events --
+# -events --
 EVENT_PATTERNS = [
     # Calendar update: family dinner, 2026-09-19 at 10:00, the library.
     re.compile(
@@ -65,7 +63,7 @@ EVENT_PATTERNS = [
 HIGH_PRIORITY_EVENT_KEYWORDS = ("interview", "review", "briefing")
 LOW_PRIORITY_EVENT_KEYWORDS = ("dinner", "catch-up", "doctor appointment")
 
-# ----------------------------------------------------------------- tasks --
+#  tasks --
 # (regex, title_template) - title_template uses named groups from the match
 TASK_PATTERNS = [
     (re.compile(rf"Can you review the (?P<obj>.+?) before {DATE_RE}\?", re.I), "Review {obj}"),

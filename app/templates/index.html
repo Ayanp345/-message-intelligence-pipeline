@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<p class="muted">Rule-based pipeline output over {{ summary.total_messages }} messages. All sensitive values are masked before being written to disk or rendered here.</p>
+<div class="grid">
+  <div class="stat"><div class="num">{{ summary.total_messages }}</div><div class="label">Total Messages</div></div>
+  <div class="stat"><div class="num">{{ summary.total_tasks_extracted }}</div><div class="label">Tasks Extracted</div></div>
+  <div class="stat"><div class="num">{{ summary.total_events_extracted }}</div><div class="label">Events Extracted</div></div>
+  <div class="stat"><div class="num">{{ summary.total_sensitive_findings }}</div><div class="label">Sensitive Findings</div></div>
+</div>
+<div class="card">
+  <h3 style="margin-top:0">Category breakdown</h3>
+  <table>
+    <tr><th>Category</th><th>Count</th></tr>
+    {% for cat, count in summary.category_counts.items() %}
+    <tr><td><span class="pill cat-{{ cat }}">{{ cat }}</span></td><td>{{ count }}</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

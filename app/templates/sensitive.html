@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<p class="muted">All values below are masked. Raw values are never written to disk or rendered.</p>
+<div class="card">
+  <table>
+    <tr><th>Message ID</th><th>Type</th><th>Risk</th><th>Masked Message</th><th>Recommended Action</th></tr>
+    {% for f in findings %}
+    <tr>
+      <td>{{ f.message_id }}</td>
+      <td>{{ f.sensitivity_type }}</td>
+      <td class="risk-{{ f.risk }}">{{ f.risk }}</td>
+      <td>{{ f.masked_text }}</td>
+      <td>{{ f.recommended_action }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

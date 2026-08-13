@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<form method="get">
+  <select name="category" onchange="this.form.submit()">
+    {% for c in ["all","action_required","meeting_or_event","personal_information","general_information","promotional","sensitive_information"] %}
+    <option value="{{c}}" {% if c==category %}selected{% endif %}>{{c}}</option>
+    {% endfor %}
+  </select>
+</form>
+<div class="card">
+  <table>
+    <tr><th>ID</th><th>Timestamp</th><th>Sender</th><th>Message</th><th>Category</th></tr>
+    {% for m in messages %}
+    <tr>
+      <td>{{ m.message_id }}</td>
+      <td class="muted">{{ m.timestamp }}</td>
+      <td>{{ m.sender }}</td>
+      <td>{{ m.text }}</td>
+      <td><span class="pill cat-{{ m.category }}">{{ m.category }}</span></td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+<p class="muted">Showing first 200 matching messages.</p>
+{% endblock %}

@@ -1,6 +1,4 @@
 """
-pipeline.py
------------
 Entry point. Reads the dataset in chronological order (the CSV is already
 sorted by timestamp, we do not re-sort in case of ties -> preserves file
 order) and runs, for every message:

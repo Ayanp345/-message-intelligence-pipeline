@@ -1,25 +1,3 @@
-"""
-app.py - lightweight demo UI for the assignment.
-
-Serves the pre-computed pipeline output (output/*.json). It NEVER reads the
-raw messages.csv -> only the display-safe display_messages.json (sensitive
-messages are already masked before this file was written), so there is no
-way for a raw secret to be rendered by this app, even by accident.
-
-Run locally:
-    pip install -r requirements.txt
-    python3 app.py
-    -> http://localhost:5000
-
-Deploy (free options, pick one, ~5 min each):
-    - Render.com          : "New Web Service" -> connect repo -> build
-                             command `pip install -r requirements.txt`,
-                             start command `python app.py`.
-    - Railway.app         : "New Project" -> "Deploy from GitHub repo".
-    - PythonAnywhere      : upload files, create a Flask web app pointing
-                             at app.py.
-"""
-
 import json
 import os
 from flask import Flask, render_template, request, jsonify

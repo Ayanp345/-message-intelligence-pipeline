@@ -1,21 +1,3 @@
-"""
-sensitive_detection 
-Detects sensitive information inside a message and produces a masked
-version of the text. Pure regex/keyword based -> fully deterministic,
-fully explainable, no data ever leaves the machine.
-
-Detection strategy
-The assignment lists six sensitive categories. Each is implemented as one
-(name, compiled_regex, risk, action) rule. Rules are checked in a fixed
-order (most specific / highest-risk first) and ALL matching rules on a
-message are reported (a message can contain more than one sensitive value,
-e.g. a card number AND a CVV in the same line).
-
-For every match we mask ONLY the captured sensitive span, not the whole
-message, so the rest of the sentence stays readable in the demo video
-while the secret itself never appears in logs / screenshots.
-"""
-
 import re
 from dataclasses import dataclass, field
 from typing import List
